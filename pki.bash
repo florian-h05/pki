@@ -2,6 +2,8 @@
 
 ## Private: Setup the root CA
 #
+# Usage:
+#   setup_root_ca
 setup_root_ca() {
   echo "Generating root CA CSR..."
   openssl req -new \
@@ -20,8 +22,6 @@ setup_root_ca() {
 #
 # Usage:
 #   setup_intermediate_ca caName
-# Example:
-#   setup_intermediate_ca "signing"
 setup_intermediate_ca() {
   echo "Generating ${1} intermediate CA CSR..."
   openssl req -new \
@@ -40,8 +40,6 @@ setup_intermediate_ca() {
 #
 # Usage:
 #   set_organization_name organizationName
-# Example:
-#   set_organization_name "Florian IT"
 set_organization_name() {
   find etc -type f -exec sed -i "s/Simple Inc/${1}/g" {} +
 }
@@ -50,8 +48,6 @@ set_organization_name() {
 #
 # Usage:
 #   setup organizationName
-# Example
-#   setup "Florian IT"
 setup() {
   set_organization_name "${1}"
   setup_root_ca
@@ -63,8 +59,6 @@ setup() {
 #
 # Usage:
 #   sign_server hostname
-# Example:
-#   sign_server "openhab.localnet"
 sign_server() {
   echo "Signing ${1} server CSR..."
   openssl ca \
@@ -82,8 +76,6 @@ sign_server() {
 #
 # Usage:
 #   create_server hostname ip
-# Example:
-#   create_server "openhab.localnet" "192.168.178.46"
 create_server() {
   FILENAME="${1/./-}"
   echo "Generating ${1} server CSR..."
@@ -99,8 +91,6 @@ create_server() {
 #
 # Usage:
 #   sign_client commonName
-# Example:
-#   sign_client Florian-iPhone
 sign_client() {
   FILENAME="${1/./-}"
   echo "Signing ${1} mTLS client CSR..."
@@ -119,8 +109,6 @@ sign_client() {
 #
 # Usage:
 #   create_client commonName
-# Example:
-#   create_client Florian-iPhone
 create_client() {
   FILENAME="${1/./-}"
   echo "Generating ${1} mTLS client CSR..."
@@ -136,8 +124,6 @@ create_client() {
 #
 # Usage:
 #   create_crl caName
-# Example:
-#   create_crl "signing"
 create_crl() {
   echo "Generating CRL for ${1} CA..."
   openssl ca -gencrl \
@@ -155,10 +141,8 @@ create_crl() {
 #   revoke caName commonName reason
 #   reason is one of: unspecified, keyCompromise, CACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold,
 #   see https://docs.openssl.org/master/man1/openssl-ca/#crl-options
-# Example:
-#   revoke "signing" "openhab.localnet" "superseded"
 revoke() {
-  serial="$(grep $2 ca/$1-ca/db/$1-ca.db | awk '{print $3}')"
+  serial="$(grep "$2" ca/"$1"-ca/db/"$1"-ca.db | awk '{print $3}' | tail -1)"
   echo "Revoking certificate for ${2} from ${1} CA due to ${3}..."
   openssl ca \
     -config "etc/${1}-ca.conf" \
@@ -166,6 +150,10 @@ revoke() {
     -crl_reason "${3}"
 }
 
+## Renew a server certificate
+#
+# Usage:
+#   renew_server commonName
 renew_server() {
   FILENAME="${1/./-}"
   revoke "signing" "${1}" "superseded"
@@ -173,6 +161,10 @@ renew_server() {
   sign_server "${1}"
 }
 
+## Renew a client certificate
+#
+# Usage:
+#   renew_client commonName
 renew_client() {
   FILENAME="${1/./-}"
   revoke "mtls" "${1}" "superseded"
@@ -184,8 +176,6 @@ renew_client() {
 #
 # Usage:
 #   view_cert commonName
-# Example:
-#   view_cert "openhab.localnet"
 view_cert() {
   FILENAME="${1/./-}"
   openssl x509 \
@@ -198,8 +188,6 @@ view_cert() {
 #
 # Usage:
 #   view_ca_cert caName
-# Example:
-#   view_ca_cert "signing"
 view_ca_cert() {
   openssl x509 \
     -in "ca/${1}-ca.crt" \
@@ -211,18 +199,24 @@ view_ca_cert() {
 #
 # Usage:
 #   view_certs_of_ca caName
-# Example:
-#   view_certs_of_ca "signing"
 view_certs_of_ca() {
   cat "ca/${1}-ca/db/${1}-ca.db"
 }
 
+## Generate a client p12 bundle
+#
+# Usage:
+#   generate_client_p12 commonName
 generate_client_p12() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} ...\n"
   openssl pkcs12 -export -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
 }
 
+## Generate a client p12 bundle with special configuration for use with iOS devices
+#
+# Usage:
+#   generate_client_p12_ios commonName
 generate_client_p12_ios() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} for iOS ...\n"
@@ -230,4 +224,5 @@ generate_client_p12_ios() {
   openssl pkcs12 -export -legacy -certpbe pbeWithSHA1And40BitRC2-CBC -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
 }
 
+# shellcheck disable=SC2068
 $@
