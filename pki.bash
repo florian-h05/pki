@@ -224,5 +224,4 @@ generate_client_p12_ios() {
   openssl pkcs12 -export -legacy -certpbe pbeWithSHA1And40BitRC2-CBC -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
 }
 
-# shellcheck disable=SC2068
-$@
+"${@}"
