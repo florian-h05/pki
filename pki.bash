@@ -16,6 +16,11 @@ setup_root_ca() {
     -in ca/root-ca.csr \
     -out ca/root-ca.crt \
     -extensions root_ca_ext
+  # Create DER version of certificate
+  openssl x509 \
+    -in ca/root-ca.crt \
+    -out ca/root-ca.cer \
+    -outform der
 }
 
 ## Private: Setup an intermediate CS
@@ -34,6 +39,13 @@ setup_intermediate_ca() {
     -in "ca/${1}-ca.csr" \
     -out "ca/${1}-ca.crt" \
     -extensions "${1}_ca_ext"
+  # Create DER version of certificate
+  openssl x509 \
+    -in "ca/${1}-ca.crt" \
+    -out "ca/${1}-ca.cer" \
+    -outform der
+  # Create PEM certificate chain
+  cat "ca/${1}-ca.crt" ca/root-ca.crt > "ca/${1}-ca-chain.pem"
 }
 
 ## Private: Set the organizationName in the config files
@@ -66,6 +78,7 @@ sign_server() {
     -in "certs/signing/${FILENAME}.csr" \
     -out "certs/signing/${FILENAME}.crt" \
     -extensions server_ext
+  # Create DER version of certificate
   openssl x509 \
     -in "certs/signing/${FILENAME}.crt" \
     -out "certs/signing/${FILENAME}.cer" \
@@ -120,7 +133,7 @@ create_client() {
   sign_client "${1}"
 }
 
-## Create a new CRL for the given CA
+## Create a new CRL in PEM format for the given CA
 #
 # Usage:
 #   create_crl caName
@@ -128,11 +141,9 @@ create_crl() {
   echo "Generating CRL for ${1} CA..."
   openssl ca -gencrl \
     -config "etc/${1}-ca.conf" \
-    -out "crl/${1}-ca.crl" \
-  openssl crl \
-    -in "crl/${1}-ca.crl" \
-    -out "crl/${1}-ca.crl" \
-    -outform der
+    -out "crl/${1}-ca.crl"
+  # Create CRL PEM chain
+  cat crl/root-ca.crl "crl/${1}-ca.crl" > "crl/${1}-ca-chain.crl"
 }
 
 ## Revoke a certificate signed by the given CA
