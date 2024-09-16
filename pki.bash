@@ -214,21 +214,21 @@ view_certs_of_ca() {
   cat "ca/${1}-ca/db/${1}-ca.db"
 }
 
-## Generate a client p12 bundle
+## Build a client p12 bundle
 #
 # Usage:
-#   generate_client_p12 commonName
-generate_client_p12() {
+#   build_client_p12 commonName
+build_client_p12() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} ...\n"
   openssl pkcs12 -export -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
 }
 
-## Generate a client p12 bundle with special configuration for use with iOS devices
+## Build a client p12 bundle with special configuration for use with iOS devices
 #
 # Usage:
-#   generate_client_p12_ios commonName
-generate_client_p12_ios() {
+#   build_client_p12_ios commonName
+build_client_p12_ios() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} for iOS ...\n"
   # Adding -legacy -certpbe pbeWithSHA1And40BitRC2-CBC for iOS compatibility, but breaks Chromium compatibility!
