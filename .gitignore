@@ -10,3 +10,11 @@
 **.p12
 # Ignore CRLs
 **.crl
+
+## Ignore old serials
+**.srl.old
+# Ignore old DBs
+**.db.old
+# Ignore (old) attributes
+**.db.attr
+**.db.attr.old
