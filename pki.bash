@@ -1,5 +1,10 @@
 #!/bin/bash
 
+CERTS_SIGNING=certs/signing/
+REQS_SIGNING=reqs/signing/
+CERTS_MTLS=certs/mtls/
+REQS_MTLS=reqs/mtls/
+
 ## Private: Setup the root CA
 #
 # Usage:
@@ -44,7 +49,7 @@ setup_intermediate_ca() {
     -in "ca/${1}-ca.crt" \
     -out "ca/${1}-ca.cer" \
     -outform der
-  # Create PEM certificate chain
+  # Create PEM certificate chain with root CA
   cat "ca/${1}-ca.crt" ca/root-ca.crt > "ca/${1}-ca-chain.pem"
 }
 
@@ -75,14 +80,16 @@ sign_server() {
   echo "Signing ${1} server CSR..."
   openssl ca \
     -config etc/signing-ca.conf \
-    -in "reqs/signing/${FILENAME}.csr" \
-    -out "certs/signing/${FILENAME}.crt" \
+    -in "${REQS_SIGNING}${FILENAME}.csr" \
+    -out "${CERTS_SIGNING}${FILENAME}.crt" \
     -extensions server_ext
   # Create DER version of certificate
   openssl x509 \
-    -in "certs/signing/${FILENAME}.crt" \
-    -out "certs/signing/${FILENAME}.cer" \
+    -in "${CERTS_SIGNING}${FILENAME}.crt" \
+    -out "${CERTS_SIGNING}${FILENAME}.cer" \
     -outform der
+  # Create PEM certificate chain with intermediate CA
+  cat "${CERTS_SIGNING}${FILENAME}.crt" ca/signing-ca.crt > "${CERTS_SIGNING}${FILENAME}-chain.pem"
 }
 
 ## Create a new TLS server certificate
@@ -95,8 +102,8 @@ create_server() {
   DNS="${1}" IP="${2}" \
   openssl req -new \
     -config etc/server.conf \
-    -out "reqs/signing/${FILENAME}.csr" \
-    -keyout "certs/signing/${FILENAME}.key"
+    -out "${REQS_SIGNING}${FILENAME}.csr" \
+    -keyout "${CERTS_SIGNING}${FILENAME}.key"
   sign_server "${1}"
 }
 
@@ -109,12 +116,12 @@ sign_client() {
   echo "Signing ${1} mTLS client CSR..."
   openssl ca \
     -config etc/mtls-ca.conf \
-    -in "reqs/mtls/${FILENAME}.csr" \
-    -out "certs/mtls/${FILENAME}.crt" \
+    -in "${REQS_MTLS}${FILENAME}.csr" \
+    -out "${CERTS_MTLS}${FILENAME}.crt" \
     -extensions client_ext
   openssl x509 \
-    -in "certs/mtls/${FILENAME}.crt" \
-    -out "certs/mtls/${FILENAME}.cer" \
+    -in "${CERTS_MTLS}${FILENAME}.crt" \
+    -out "${CERTS_MTLS}${FILENAME}.cer" \
     -outform der
 }
 
@@ -128,8 +135,8 @@ create_client() {
   CN="${1}" \
   openssl req -new \
     -config etc/client.conf \
-    -out "reqs/mtls/${FILENAME}.csr" \
-    -keyout "certs/mtls/${FILENAME}.key"
+    -out "${REQS_MTLS}${FILENAME}.csr" \
+    -keyout "${CERTS_MTLS}${FILENAME}.key"
   sign_client "${1}"
 }
 
@@ -154,6 +161,8 @@ create_crl() {
   openssl ca -gencrl \
     -config "etc/${1}-ca.conf" \
     -out "crls/${1}-ca.crl"
+  # Create root CA CRL
+  create_root_crl
   # Create CRL PEM chain
   cat crls/root-ca.crl "crls/${1}-ca.crl" > "crls/${1}-ca-chain.crl"
 }
@@ -231,7 +240,7 @@ view_certs_of_ca() {
 build_client_p12() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} ...\n"
-  openssl pkcs12 -export -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
+  openssl pkcs12 -export -out "p12/${FILENAME}.p12" -inkey "${CERTS_MTLS}${FILENAME}.key" -in "${CERTS_MTLS}${FILENAME}.crt"
 }
 
 ## Build a client p12 bundle with special configuration for use with iOS devices
@@ -242,7 +251,7 @@ build_client_p12_ios() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} for iOS ...\n"
   # Adding -legacy -certpbe pbeWithSHA1And40BitRC2-CBC for iOS compatibility, but breaks Chromium compatibility!
-  openssl pkcs12 -export -legacy -certpbe pbeWithSHA1And40BitRC2-CBC -out "p12/${FILENAME}.p12" -inkey "certs/mtls/${FILENAME}.key" -in "certs/mtls/${FILENAME}.crt"
+  openssl pkcs12 -export -legacy -certpbe pbeWithSHA1And40BitRC2-CBC -out "p12/${FILENAME}.p12" -inkey "${CERTS_MTLS}${FILENAME}.key" -in "${CERTS_MTLS}${FILENAME}.crt"
 }
 
 "${@}"
