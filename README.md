@@ -39,15 +39,15 @@ To install a CA certificate on operation systems, see:
 
 - Fedora (DER, PEM): [Using Shared System Certificates :: Fedora Docs](https://docs.fedoraproject.org/en-US/quick-docs/using-shared-system-certificates/#proc_adding-new-certificates)
 - Debian (PEM): [Baeldung: How to Add, Remove, and Update CA Certificates in Linux](https://www.baeldung.com/linux/ca-certificate-management#1-debian-distributions)
-- Windows: via Chrome browser or the management console
+- Windows (DER, PEM): via Chrome browser or the management console
 - iOS (DER, PEM): [Distribute certificates to Apple devices](https://support.apple.com/guide/deployment/distribute-certificates-depcdc9a6a3f/web) & [Trust manually installed certificate profiles in iOS, iPadOS, and visionOS](https://support.apple.com/en-us/102390)
-- Android 10: Just click on the certificate file.
+- Android 10 (DER, PEM): Just click on the certificate file.
 
 To install a CA certificate in software, see:
 
 - Java (DER): [openHAB Docs :: Connect to InfluxDB via TLS](https://www.openhab.org/addons/persistence/influxdb/#connect-to-influxdb-via-tls) (don't wonder, the docs are about InfluxDB but that doesn't matter -- the approach is the same)
-- Firefox: Options -> Privacy & Security -> Certificates -> View Certificates
-- Chrome: Settings -> Privacy and Security -> Security -> Manage Certificates
+- Firefox (DER, PEM): Options -> Privacy & Security -> Certificates -> View Certificates
+- Chrome (DER, PEM): Settings -> Privacy and Security -> Security -> Manage Certificates
 
 ### TLS Webserver Certificates
 
