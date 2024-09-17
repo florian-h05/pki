@@ -133,17 +133,29 @@ create_client() {
   sign_client "${1}"
 }
 
-## Create a new CRL in PEM format for the given CA
+## Create a new CRL in PEM format for the root CA
 #
 # Usage:
-#   create_crl caName
+#   create_root_crl
+create_root_crl() {
+  echo "Generating CRL for ${1} CA..."
+  openssl ca -gencrl \
+    -config etc/root-ca.conf \
+    -out crls/root-ca.crl
+}
+
+## Create a new CRL in PEM format for the given intermediate CA
+#
+# Usage:
+#   create_crl intermediateCa
 create_crl() {
+  if [ $1 = "root" ]; then echo "Use create_root_crl instead." && exit 1; fi
   echo "Generating CRL for ${1} CA..."
   openssl ca -gencrl \
     -config "etc/${1}-ca.conf" \
-    -out "crl/${1}-ca.crl"
+    -out "crls/${1}-ca.crl"
   # Create CRL PEM chain
-  cat crl/root-ca.crl "crl/${1}-ca.crl" > "crl/${1}-ca-chain.crl"
+  cat crls/root-ca.crl "crls/${1}-ca.crl" > "crls/${1}-ca-chain.crl"
 }
 
 ## Revoke a certificate signed by the given CA
