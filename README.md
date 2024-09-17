@@ -3,6 +3,20 @@
 The goal of this project is to provide a easy-to-use PKI that is purely based on OpenSSL 3.0.13
 and provides both TLS server certificates as well as client certificates for mTLS-based client authentication.
 
+## Installation
+
+Clone this repository from GitHub:
+
+```bash
+git clone https://github.com/florian-h05/pki.git
+```
+
+Make `pki.bash` executable:
+
+```bash
+chmod +x pki.bash
+```
+
 ## Usage
 
 ### Setup
@@ -10,7 +24,7 @@ and provides both TLS server certificates as well as client certificates for mTL
 Before first use of the PKI, you have to set it up:
 
 ```bash
-bash pki.bash setup "Organization Name"
+./pki.bash setup "Organization Name"
 ```
 
 During the creation of the root CA and the intermediate CAs, you will be asked for several PEM passphrases.
@@ -21,14 +35,19 @@ Store them safely!
 The root CA's certificate has to be installed on all clients that need to trust the server certificates.
 It is available in DER format as `ca/root-ca.cer` and in PEM format as `ca/root-ca.crt`.
 
-To install a CA certificate, see:
+To install a CA certificate on operation systems, see:
 
 - Fedora (DER, PEM): [Using Shared System Certificates :: Fedora Docs](https://docs.fedoraproject.org/en-US/quick-docs/using-shared-system-certificates/#proc_adding-new-certificates)
 - Debian (PEM): [Baeldung: How to Add, Remove, and Update CA Certificates in Linux](https://www.baeldung.com/linux/ca-certificate-management#1-debian-distributions)
-- Windows
+- Windows: via Chrome browser or the management console
 - iOS (DER, PEM): [Distribute certificates to Apple devices](https://support.apple.com/guide/deployment/distribute-certificates-depcdc9a6a3f/web) & [Trust manually installed certificate profiles in iOS, iPadOS, and visionOS](https://support.apple.com/en-us/102390)
-- Android
+- Android 10: Just click on the certificate file.
+
+To install a CA certificate in software, see:
+
 - Java (DER): [openHAB Docs :: Connect to InfluxDB via TLS](https://www.openhab.org/addons/persistence/influxdb/#connect-to-influxdb-via-tls) (don't wonder, the docs are about InfluxDB but that doesn't matter -- the approach is the same)
+- Firefox: Options -> Privacy & Security -> Certificates -> View Certificates
+- Chrome: Settings -> Privacy and Security -> Security -> Manage Certificates
 
 ### TLS Webserver Certificates
 
@@ -37,7 +56,7 @@ To install a CA certificate, see:
 To create a certificate for a TLS webserver, use the `create_server` function:
 
 ```bash
-bash pki.bash create_server "hostname.local" "10.10.10.10"
+./pki.bash create_server "hostname.local" "10.10.10.10"
 ```
 
 You will be asked a number of questions, do NOT modify the organization name!
@@ -47,6 +66,7 @@ After you have completed the CSR creation and signing process, you will find the
 
 - `hostname-local.cer`: The certificate in DER format - use the DER format to publish to format ([RFC 2585#section-3](https://datatracker.ietf.org/doc/html/rfc2585.html#section-3))
 - `hostname-local.crt`: The certificate in PEM format.
+_ `hostname-local-chain.pem`: The certificate chain containing the server certificate itself and the signing CA certificate.
 - `hostname-local.key`: The private key - keep it safe!
 
 The CSR will be located in the [reqs/signing/](/reqs/signing/) folder:
@@ -65,6 +85,17 @@ To deploy a webserver certificate to the server, you need these three files:
 
 Note: You might also use the PEM (`.crt`) certificate versions instead of the DER (`.cer`) versions.
 
+Alternatively, e.g. for nginx, you need instead:
+
+- `certs/signing/hostname-local-chain.pem`: The certificate chain.
+- `certs/signing/hostname-local.key`: The private key of the server certificate.
+
+For the AVM Fritz!Box, you need the certificate chain and private key in a single PEM bundle:
+
+```bash
+cat cat certs/signing/fritz-box-chain.pem certs/signing/fritz-box.key > fritz-box.pem
+```
+
 ### mTLS Client Certificate Authentication
 
 #### Creation of mTLS Client Certificate
@@ -72,19 +103,19 @@ Note: You might also use the PEM (`.crt`) certificate versions instead of the DE
 To create a mTLS authentication client certificate, use the `create_client` function:
 
 ```bash
-bash pki.bash create_client "User-Device"
+./pki.bash create_client "User-Device"
 ```
 
 After you have successfully created a client certificate, you need to bundle it with its private key into the PKCS#12 format:
 
 ```bash
-bash pki.bash build_client_p12 "User-Device"
+./pki.bash build_client_p12 "User-Device"
 ```
 
-or alternatively for iOS/iPadOS devices:
+or alternatively for iOS/iPadOS and Android devices:
 
 ```bash
-bash pki.bash build_client_p12_ios "User-Device"
+./pki.bash build_client_p12_legacy "User-Device"
 ```
 
 You will be prompted a password to encrypt the PKCS#12 bundle, which can be found in the [p12/](p12/) folder.
@@ -96,7 +127,7 @@ You will be prompted a password to encrypt the PKCS#12 bundle, which can be foun
 You can create a CRL and the CRL chain for the mTLS CA using the following command:
 
 ```bash
-bash pki.bash create_crl "mtls"
+./pki.bash create_crl "mtls"
 ```
 
 This will automatically refresh the root CA CRL as this is required for the CRL chain.
@@ -127,7 +158,7 @@ See [nginx: ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_mod
 #### Certificate Revocation
 
 ```bash
-bash pki.bash revoke caName commonName reason
+./pki.bash revoke caName commonName reason
 ```
 
 where `reason` is one of the following: `unspecified`, `keyCompromise`, `CACompromise`, `affiliationChanged`, `superseded`, `cessationOfOperation`, `certificateHold`.
@@ -137,13 +168,13 @@ Remember to regenerate the CRL afterwards!
 #### Generate a Certificate Revocation List (CRL)
 
 ```bash
-bash pki.bash create_crl intermediateCa
+./pki.bash create_crl intermediateCa
 ```
 
 or for the `root` CA:
 
 ```bash
-bash pki.bash create_root_crl
+./pki.bash create_root_crl
 ```
 
 If a intermediate CA CRL is generated, the root CA CRL will automatically be regenerated to properly build the CRL chain.
@@ -153,13 +184,13 @@ If a intermediate CA CRL is generated, the root CA CRL will automatically be reg
 For TLS webserver certificates:
 
 ```bash
-bash pki.bash renew_server "hostname.localnet"
+./pki.bash renew_server "hostname.localnet"
 ```
 
 For mTLS client certificates:
 
 ```
-bash pki.bash renew_client "User-Device"
+./pki.bash renew_client "User-Device"
 ```
 
 Remember to regenerate the CRL afterwards!
@@ -167,13 +198,13 @@ Remember to regenerate the CRL afterwards!
 #### View a CA Certificate
 
 ```bash
-bash pki.bash view_ca_cert caName
+./pki.bash view_ca_cert caName
 ```
 
 #### View a Single Certificate
 
 ```bash
-bash pki.bash view_cert caName commonName
+./pki.bash view_cert caName commonName
 ```
 
 #### List all Certificates of a CA
@@ -181,7 +212,7 @@ bash pki.bash view_cert caName commonName
 This is especially useful to check the expiration dates of the certificates of this CA.
 
 ```bash
-bash pki.bash view_certs_of_ca caName
+./pki.bash view_certs_of_ca caName
 ```
 
 The output format is as follows:
