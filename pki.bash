@@ -198,11 +198,11 @@ renew_client() {
 ## View a certificate
 #
 # Usage:
-#   view_cert commonName
+#   view_cert caName commonName
 view_cert() {
-  FILENAME="${1/./-}"
+  FILENAME="${2/./-}"
   openssl x509 \
-    -in "certs/${FILENAME}.crt" \
+    -in "certs/${1}/${FILENAME}.crt" \
     -noout \
     -text
 }
