@@ -1,0 +1,10 @@
+# Ignore certificates
+.crt
+.cer
+.pem
+# Ignore CSRs
+.csr
+# Ignore private keys
+.key
+# Ignore CRLs
+.crl
