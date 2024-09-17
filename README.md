@@ -43,12 +43,15 @@ bash pki.bash create_server "hostname.local" "10.10.10.10"
 You will be asked a number of questions, do NOT modify the organization name!
 It MUST match with the organization name of the signing (and hence the root) CA.
 
-After you have completed the CSR creation and signing process, you will find these files in the `certs/signing` folder:
+After you have completed the CSR creation and signing process, you will find these files in the [certs/signing/](certs/signing/) folder:
 
 - `hostname-local.cer`: The certificate in DER format - use the DER format to publish to format ([RFC 2585#section-3](https://datatracker.ietf.org/doc/html/rfc2585.html#section-3))
 - `hostname-local.crt`: The certificate in PEM format.
-- `hostname-local.csr`: The certificate signing request (CSR) - keep it there, you need it for certificate renewal.
 - `hostname-local.key`: The private key - keep it safe!
+
+The CSR will be located in the [reqs/signing/](/reqs/signing/) folder:
+
+- `hostname-local.csr`: The certificate signing request (CSR) - keep it there, you need it for certificate renewal.
 
 #### Deployment of TLS Webserver Certificates
 
@@ -90,19 +93,15 @@ You will be prompted a password to encrypt the PKCS#12 bundle, which can be foun
 
 ##### Creation of root & mTLS CRLs
 
-First, you need to create a CRL for the root CA:
-
-```bash
-bash pki.bash create_crl "root"
-```
-
-Then you can create the CRL for the mTLS CA and the CRL chain:
+You can create a CRL and the CRL chain for the mTLS CA using the following command:
 
 ```bash
 bash pki.bash create_crl "mtls"
 ```
 
-You will find the CRL and the CRL chain in PEM format in the [crl/](crl/) folder, these are valid for 365 days:
+This will automatically refresh the root CA CRL as this is required for the CRL chain.
+
+You will find the CRL and the CRL chain in PEM format in the [crls/](crls/) folder, these are valid for 365 days:
 
 - `root-ca.crl`
 - `mtls-ca.crl`
