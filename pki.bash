@@ -243,14 +243,14 @@ build_client_p12() {
   openssl pkcs12 -export -out "p12/${FILENAME}.p12" -inkey "${CERTS_MTLS}${FILENAME}.key" -in "${CERTS_MTLS}${FILENAME}.crt"
 }
 
-## Build a client p12 bundle with special configuration for use with iOS devices
+## Build a client p12 bundle with legacy configuration for use with iOS/iPadOS and Android 10 devices
 #
 # Usage:
 #   build_client_p12_ios commonName
-build_client_p12_ios() {
+build_client_p12_legacy() {
   FILENAME="${1/./-}"
   echo -e "\nGenerating p12 bundle for ${1} for iOS ...\n"
-  # Adding -legacy -certpbe pbeWithSHA1And40BitRC2-CBC for iOS compatibility, but breaks Chromium compatibility!
+  # Adding -legacy -certpbe pbeWithSHA1And40BitRC2-CBC for iOS/iPadOS & Android 10 compatibility, but breaks Chromium compatibility!
   openssl pkcs12 -export -legacy -certpbe pbeWithSHA1And40BitRC2-CBC -out "p12/${FILENAME}.p12" -inkey "${CERTS_MTLS}${FILENAME}.key" -in "${CERTS_MTLS}${FILENAME}.crt"
 }
 
