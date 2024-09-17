@@ -72,19 +72,19 @@ Note: You might also use the PEM (`.crt`) certificate versions instead of the DE
 To create a mTLS authentication client certificate, use the `create_client` function:
 
 ```bash
-bash pki.bash create_client "Client Name"
+bash pki.bash create_client "User-Device"
 ```
 
 After you have successfully created a client certificate, you need to bundle it with its private key into the PKCS#12 format:
 
 ```bash
-bash pki.bash build_client_p12 "Client Name"
+bash pki.bash build_client_p12 "User-Device"
 ```
 
 or alternatively for iOS/iPadOS devices:
 
 ```bash
-bash pki.bash build_client_p12_ios "Client Name"
+bash pki.bash build_client_p12_ios "User-Device"
 ```
 
 You will be prompted a password to encrypt the PKCS#12 bundle, which can be found in the [p12/](p12/) folder.
@@ -121,6 +121,77 @@ Please note that you need to copy the two files above to a location where nginx 
 This is just an example to illustrate which file to use for what.
 
 See [nginx: ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) for more information.
+
+### General Certificate Management
+
+#### Certificate Revocation
+
+```bash
+bash pki.bash revoke caName commonName reason
+```
+
+where `reason` is one of the following: `unspecified`, `keyCompromise`, `CACompromise`, `affiliationChanged`, `superseded`, `cessationOfOperation`, `certificateHold`.
+
+Remember to regenerate the CRL afterwards!
+
+#### Generate a Certificate Revocation List (CRL)
+
+```bash
+bash pki.bash create_crl intermediateCa
+```
+
+or for the `root` CA:
+
+```bash
+bash pki.bash create_root_crl
+```
+
+If a intermediate CA CRL is generated, the root CA CRL will automatically be regenerated to properly build the CRL chain.
+
+#### Certificate Renewal
+
+For TLS webserver certificates:
+
+```bash
+bash pki.bash renew_server "hostname.localnet"
+```
+
+For mTLS client certificates:
+
+```
+bash pki.bash renew_client "User-Device"
+```
+
+Remember to regenerate the CRL afterwards!
+
+#### View a CA Certificate
+
+```bash
+bash pki.bash view_ca_cert caName
+```
+
+#### View a Single Certificate
+
+```bash
+bash pki.bash view_cert caName commonName
+```
+
+#### List all Certificates of a CA
+
+This is especially useful to check the expiration dates of the certificates of this CA.
+
+```bash
+bash pki.bash view_certs_of_ca caName
+```
+
+The output format is as follows:
+
+1. Certificate status flag (V=valid, R=revoked, E=expired).
+1. Certificate expiration date in [YY]YYMMDDHHMMSSZ format.
+1. Certificate revocation date in [YY]YYMMDDHHMMSSZ[,reason] format. Empty if not revoked.
+1. Certificate serial number in hex.
+1. Certificate filename or literal string `unknown`.
+1. Certificate subject DN.
 
 ## Acknowledgments
 
