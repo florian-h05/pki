@@ -75,7 +75,7 @@ sign_server() {
   echo "Signing ${1} server CSR..."
   openssl ca \
     -config etc/signing-ca.conf \
-    -in "certs/signing/${FILENAME}.csr" \
+    -in "reqs/signing/${FILENAME}.csr" \
     -out "certs/signing/${FILENAME}.crt" \
     -extensions server_ext
   # Create DER version of certificate
@@ -95,7 +95,7 @@ create_server() {
   DNS="${1}" IP="${2}" \
   openssl req -new \
     -config etc/server.conf \
-    -out "certs/signing/${FILENAME}.csr" \
+    -out "reqs/signing/${FILENAME}.csr" \
     -keyout "certs/signing/${FILENAME}.key"
   sign_server "${1}"
 }
@@ -109,7 +109,7 @@ sign_client() {
   echo "Signing ${1} mTLS client CSR..."
   openssl ca \
     -config etc/mtls-ca.conf \
-    -in "certs/mtls/${FILENAME}.csr" \
+    -in "reqs/mtls/${FILENAME}.csr" \
     -out "certs/mtls/${FILENAME}.crt" \
     -extensions client_ext
   openssl x509 \
@@ -128,7 +128,7 @@ create_client() {
   CN="${1}" \
   openssl req -new \
     -config etc/client.conf \
-    -out "certs/mtls/${FILENAME}.csr" \
+    -out "reqs/mtls/${FILENAME}.csr" \
     -keyout "certs/mtls/${FILENAME}.key"
   sign_client "${1}"
 }
