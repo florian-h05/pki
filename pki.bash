@@ -180,7 +180,6 @@ revoke() {
 renew_server() {
   FILENAME="${1/./-}"
   revoke "signing" "${1}" "superseded"
-  create_crl "signing"
   sign_server "${1}"
 }
 
@@ -191,7 +190,6 @@ renew_server() {
 renew_client() {
   FILENAME="${1/./-}"
   revoke "mtls" "${1}" "superseded"
-  create_crl "mtls"
   sign_client "${1}"
 }
 
