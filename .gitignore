@@ -1,10 +1,12 @@
 # Ignore certificates
-.crt
-.cer
-.pem
+**.crt
+**.cer
+**.pem
 # Ignore CSRs
-.csr
+**.csr
 # Ignore private keys
-.key
+**.key
+# Ignore p12 bundles
+**.p12
 # Ignore CRLs
-.crl
+**.crl
