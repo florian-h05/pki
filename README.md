@@ -1,8 +1,8 @@
 # pki.bash
 
-<img align="right" width="220" src="./logo.svg" />
+<img align="right" width="220" src="./logo.svg" alt="logo" />
 
-A simple yet powerful public key infrastrukture build around OpenSSL 3 with no additional dependencies,
+A simple yet powerful public key infrastructure build around OpenSSL 3 with no additional dependencies,
 providing TLS server authentication certificates and mTLS client authentication certificates.
 
 ## Installation
@@ -37,7 +37,7 @@ Store them safely!
 The root CA's certificate has to be installed on all clients that need to trust the server certificates.
 It is available in DER format as `ca/root-ca.cer` and in PEM format as `ca/root-ca.crt`.
 
-To install a CA certificate on operation systems, see:
+To install a CA certificate on an operating systems, see:
 
 - Fedora (DER, PEM): [Using Shared System Certificates :: Fedora Docs](https://docs.fedoraproject.org/en-US/quick-docs/using-shared-system-certificates/#proc_adding-new-certificates)
 - Debian (PEM): [Baeldung: How to Add, Remove, and Update CA Certificates in Linux](https://www.baeldung.com/linux/ca-certificate-management#1-debian-distributions)
@@ -179,7 +179,7 @@ or for the `root` CA:
 ./pki.bash create_root_crl
 ```
 
-If a intermediate CA CRL is generated, the root CA CRL will automatically be regenerated to properly build the CRL chain.
+If an intermediate CA CRL is generated, the root CA CRL will automatically be regenerated to properly build the CRL chain.
 
 #### Certificate Renewal
 
