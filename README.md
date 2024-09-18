@@ -1,5 +1,7 @@
 # pki.bash
 
+<img align="right" width="220" src="./logo.svg" />
+
 A simple yet powerful public key infrastrukture build around OpenSSL 3 with no additional dependencies,
 providing TLS server authentication certificates and mTLS client authentication certificates.
 
