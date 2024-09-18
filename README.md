@@ -8,7 +8,7 @@ providing TLS server authentication certificates and mTLS client authentication 
 Clone this repository from GitHub:
 
 ```bash
-git clone https://github.com/florian-h05/pki.git
+git clone https://github.com/florian-h05/pki.bash.git
 ```
 
 Make `pki.bash` executable:
