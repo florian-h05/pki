@@ -1,7 +1,7 @@
-# pki
+# pki.bash
 
-The goal of this project is to provide a easy-to-use PKI that is purely based on OpenSSL 3.0.13
-and provides both TLS server certificates as well as client certificates for mTLS-based client authentication.
+A simple yet powerful public key infrastrukture build around OpenSSL 3 with no additional dependencies,
+providing TLS server authentication certificates and mTLS client authentication certificates.
 
 ## Installation
 

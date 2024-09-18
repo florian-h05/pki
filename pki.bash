@@ -1,4 +1,9 @@
 #!/bin/bash
+# Script: pki.bash
+# Purpose: A simple yet powerful public key infrastrukture build around OpenSSL 3 with no additional dependencies,
+#          providing TLS server authentication certificates and mTLS client authentication certificates.
+# Author: Florian Hotze
+# License: GPL-3.0
 
 CERTS_SIGNING=certs/signing/
 REQS_SIGNING=reqs/signing/
