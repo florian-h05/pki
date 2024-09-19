@@ -1,3 +1,5 @@
+.idea
+
 # Ignore certificates
 **.crt
 **.cer
