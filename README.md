@@ -2,7 +2,7 @@
 
 <img align="right" width="220" src="./logo.svg" alt="logo" />
 
-A simple yet powerful public key infrastructure build around OpenSSL 3 with no additional dependencies,
+A simple yet powerful public key infrastructure built around OpenSSL 3 with no additional dependencies,
 providing TLS server authentication certificates and mTLS client authentication certificates.
 
 ## Installation
